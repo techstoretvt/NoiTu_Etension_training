@@ -1,0 +1,108 @@
+.row.justify-content-center p.cp-text {
+    display: none !important;
+}
+
+.newclass {
+    /* background-color: aqua; */
+}
+
+
+.modeNoiTuContainer {
+    /* background-color: red; */
+    min-width: 200px;
+    min-height: 200px;
+}
+
+.titleThemTuDie,
+.titleThemTuTraLoi,
+.titleXoaTu {
+    font-weight: bold;
+    font-size: 20px;
+
+}
+
+.wrapThemTuDie,
+.wrapThemTuTraLoi,
+.wrapXoaTu {
+    display: flex;
+    gap: 10px;
+    /* margin-bottom: 20px; */
+}
+
+.ipBatDau_themTuDie,
+.ipKetThuc_themTuDie,
+.ipBatDau_themTuTraLoi,
+.ipKetThuc_themTuTraLoi,
+.ipBatDau_xoaTu,
+.ipKetThuc_XoaTu {
+    height: 40px;
+}
+
+.btnThemTuDie,
+.btnThemTuTraLoi,
+.btnGoiY,
+.btnXoaTu {
+    min-height: 40px !important;
+}
+
+.btnGoiY {
+    margin-bottom: 20px;
+}
+
+.btnIconThemTuDie,
+.btnIconThemTutraloi {
+    width: fit-content;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: red;
+    cursor: pointer;
+    padding: 4px 10px;
+    margin-top: 0px;
+    font-size: 12px;
+}
+
+.btnIconThemTutraloi {
+    background-color: green;
+}
+
+.jtextfill {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    justify-content: center;
+}
+
+#currentWord {
+    font-size: 25px !important;
+}
+
+
+
+.error {
+    animation: shake 0.2s ease-in-out 0s infinite;
+    box-shadow: 0 0 0.5em red !important;
+}
+
+@keyframes shake {
+    0% {
+        margin-left: 0rem;
+        background-color: red !important;
+    }
+
+    25% {
+        margin-left: 0.5rem;
+        background-color: yellow !important;
+    }
+
+    75% {
+        margin-left: -0.5rem;
+        background-color: red !important;
+    }
+
+    100% {
+        margin-left: 0rem;
+        background-color: yellow !important;
+    }
+}

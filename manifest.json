@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "Nối từ training",
+    "description": "Base Level Extension",
+    "version": "1.0",
+    "action": {
+        "default_popup": "hello.html",
+        "default_icon": "hi.png"
+    },
+    "content_scripts": [
+        {
+            "js": [
+                "js/contentv2.js"
+            ],
+            "css": [
+                "css/style.css"
+            ],
+            "matches": [
+                "https://noitu.pro/arcade"
+            ]
+        }
+    ]
+}
