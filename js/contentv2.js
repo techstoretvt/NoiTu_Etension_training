@@ -19,7 +19,7 @@ const eventKeyBoard = new KeyboardEvent('keydown', {
     char: '\n'
 });
 let listWord = []
-const link_backend = 'https://server-noi-tu.onrender.com'
+const link_backend = 'https://server-noi-tu-online.onrender.com'
 let typeWord = ''
 let waitingTraLoi = false
 let soLanThua = 0
@@ -44,124 +44,88 @@ const getFormReplay = () => {
 getFormReplay();
 
 
-//auto click replay
-setTimeout(() => {
-    location.reload();
-}, 55000);
+let idStart = setInterval(() => {
+    let arrTextCurrent = currentWord.innerText.split(' ')
 
-//add event
-const addEvent = () => {
+    if (arrTextCurrent.length === 2) {
+        clearInterval(idStart)
 
-    //enter input text
-    inputText.onkeydown = (e) => {
-        if (e.key === 'Enter') {
-            let arrCurrentWord = currentWord.innerText.split(' ')
-            listWord.push({
-                tuBatDau: arrCurrentWord[0],
-                tuKetThuc: arrCurrentWord[1]
-            })
-            inputText.classList.remove('error')
+        //auto click replay
+        setTimeout(() => {
+            location.reload();
+        }, 55000);
 
-            waitingTraLoi = true
-            setTimeout(() => {
-                if (!funcHandle.checkEndGame()) {
-                    funcHandle.handleNhapTraLoi(arrCurrentWord[0], arrCurrentWord[1], 'addNew', 'Them 1: ')
-                    waitingTraLoi = false
-                    return
-                }
-                waitingTraLoi = false
-
-                //xoa tu sai
-                funcHandle.handleXoaTu(arrCurrentWord[0], arrCurrentWord[1])
-
-                //xoa tu trich xuat
-                funcHandle.handleNhapTraLoi(arrCurrentWord[0], arrCurrentWord[1], 'deleteTu', 'Xoa trich xuat: ')
-
-
-            }, 1200);
-
-        }
+        FuncAuto()
     }
 
-    //auto trả lời
-    setInterval(async () => {
+}, 1000)
 
-        //reset game
-        funcHandle.resetGame();
 
-        let arrTextCurrent = currentWord.innerText.split(' ')
-        // listWord.push({
-        //     tuBatDau: arrTextCurrent[0],
-        //     tuKetThuc: arrTextCurrent[1]
-        // })
 
-        //them tu
-        funcHandle.handleNhapTraLoi(arrTextCurrent[0], arrTextCurrent[1], 'addNew', '')
+const config = { childList: true, subtree: true, characterData: true };
+const callback = async function (mutationsList, observer) {
+    for (let mutation of mutationsList) {
+        if (mutation.type === 'childList') {
 
-        //get goi y
-        // let newListWord = listWord.filter(item => item.tuBatDau === arrTextCurrent[1])
-        //     .map(item => item.tuKetThuc)
-        let data = await funcHandle.getGoiY(arrTextCurrent[1], [])
-
-        //ko tim thay
-        if (data.errCode === 1 && data?.mess === "not found" || data.errCode === -1) {
-            console.log('không tim thay: ', data);
-            funcHandle.handleThemTuDie(arrTextCurrent[0], arrTextCurrent[1])
-            location.reload()
-            inputText.classList.add('error')
-            wordOld = ''
-            return;
+            //tra loi
+            FuncAuto()
         }
+    }
+};
 
-        //tim thay
-        inputText.value = data.dataTuDien && data.dataTuDien !== 'undefined' ? data.dataTuDien : data.data
 
-        if (inputText.value === wordOld) {
-            lapLai++
-            if (lapLai >= 3) {
-                lapLai = 0
-                console.log('xoa tu: ', spanHead.innerText, wordOld);
-                funcHandle.handleXoaTu(spanHead.innerText, wordOld)
-                wordOld = ''
+// Tạo một observer instance liên kết với callback function
+const observer = new MutationObserver(callback);
+observer.observe(currentWord, config);
+
+
+const FuncAuto = async () => {
+
+    let arrTextCurrent = currentWord.innerText.split(' ')
+
+    let checkTuExit = await funcHandle.kiemTraTuTonTai(arrTextCurrent[0], arrTextCurrent[1])
+    if (!checkTuExit) {
+        console.log('Thêm từ', arrTextCurrent[0], arrTextCurrent[1]);
+        funcHandle.handleNhapTraLoi(arrTextCurrent[0], arrTextCurrent[1])
+    }
+
+    //get goi y
+
+    let data = await funcHandle.getGoiY(arrTextCurrent[1], [])
+
+    //ko tim thay
+    if (data.errCode === 1 && data?.mess === "not found" || data.errCode === -1) {
+
+        const response = await fetch(`https://noitu.pro/answer?word==${arrTextCurrent[0]} ${arrTextCurrent[1]}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.nextWord.head === arrTextCurrent[1]) {
+                inputText.value = data.nextWord.tail
+                funcHandle.handleNhapTraLoi(data.nextWord.head, data.nextWord.tail)
+                let mode = window.localStorage.getItem('thoaiMode')
+                if (mode === 'on') {
+                    let timeTl = window.localStorage.getItem('ThoaiTime') ?? 0;
+                    setTimeout(() => {
+                        inputText.dispatchEvent(eventKeyBoard);
+                    }, timeTl);
+                }
+            }
+            else {
+                inputText.classList.add('error')
             }
         }
         else {
-            lapLai = 0
+            inputText.classList.add('error')
         }
+        return
+    }
 
-        wordOld = inputText.value
-        inputText.focus();
-        if (inputText.value === 'undefined') {
-            console.log('data undefined ne', data);
-            return
-        }
+    //tim thay
+    inputText.value = data.dataTuDien && data.dataTuDien !== 'undefined' ? data.dataTuDien : data.data
 
-        inputText.dispatchEvent(eventKeyBoard);
-
-        if (data.type === 'die') {
-            let check = false
-            for (let i = 0; i < listWord.length - 1; i++) {
-                let item = listWord[i]
-                if (item.tuBatDau === spanHead.innerText && item.tuKetThuc === inputText.value) {
-                    check = true
-                }
-            }
-
-            if (check) return
-
-            funcHandle.handleThemTuDie(arrTextCurrent[0], arrTextCurrent[1], "Update die: ")
-        }
-
-        if (data.type2 === 'tuDien') {
-            console.log("Tu dien: ", data.data ?? data.dataTuDien);
-        }
-
-
-    }, 1000);
-
+    inputText.dispatchEvent(eventKeyBoard);
 
 }
-addEvent();
 
 //init function
 class funcHandle {
@@ -194,59 +158,22 @@ class funcHandle {
         return true
     }
 
-    static handleXoaTu = async (tuBatDau, tuKetThuc) => {
-        let data = {
-            tuBatDau,
-            tuKetThuc
-        }
-        console.log('Xoa: ', data.tuBatDau, data.tuKetThuc);
-
-        let response = await fetch(link_backend + '/xoa-tu', {
-            method: "POST",
-            mode: "cors",
-            cache: "no-cache",
-            credentials: "same-origin",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            redirect: "follow",
-            referrerPolicy: "no-referrer",
-            body: JSON.stringify(data),
-        });
-        response = await response.json()
-    }
-
     static getGoiY = async (tuBatDau, listWord) => {
         let response = await fetch(link_backend + '/tim-tu-goi-y?tuBatDau=' + tuBatDau + '&listWord=' + listWord)
-        let data = response.json();
+        let data = await response.json();
         return data;
     }
 
-    static handleThemTuDie = async (tuBatDau, tuKetThuc, mess) => {
-        mess = mess ? mess : 'Them die: '
-        if (mess === 'Them die: ')
-            console.log(mess, tuBatDau, tuKetThuc);
-        let data = {
-            tuBatDau,
-            tuKetThuc
+    static kiemTraTuTonTai = async (tuBatDau, tuKetThuc) => {
+        let response = await fetch(link_backend + `/kiem-tra-tu-ton-tai?tuBatDau=${tuBatDau}&tuKetThuc=${tuKetThuc}`)
+        let data = await response.json();
+        if (data.errCode === 0 && data.isExit) {
+            return true
         }
-
-        let response = await fetch(link_backend + '/them-tu-die', {
-            method: "POST",
-            mode: "cors",
-            cache: "no-cache",
-            credentials: "same-origin",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            redirect: "follow",
-            referrerPolicy: "no-referrer",
-            body: JSON.stringify(data),
-        });
-
-        response = await response.json()
-
+        return false;
     }
+
+
 
     static resetGame = () => {
         if (idTimeoutReset)
@@ -257,8 +184,3 @@ class funcHandle {
         }, 10000);
     }
 }
-
-
-/**
- * "label" = 'undefined'
- */
