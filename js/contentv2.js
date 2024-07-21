@@ -87,7 +87,7 @@ const FuncAuto = async () => {
     let checkTuExit = await funcHandle.kiemTraTuTonTai(arrTextCurrent[0], arrTextCurrent[1])
     if (!checkTuExit) {
         console.log('Thêm từ', arrTextCurrent[0], arrTextCurrent[1]);
-        funcHandle.handleNhapTraLoi(arrTextCurrent[0], arrTextCurrent[1])
+        await funcHandle.handleNhapTraLoi(arrTextCurrent[0], arrTextCurrent[1])
     }
 
     //get goi y
