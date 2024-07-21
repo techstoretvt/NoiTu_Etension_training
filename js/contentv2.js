@@ -28,7 +28,17 @@ let idTimeoutReset
 let wordOld = ''
 let lapLai = 0
 
-// inputText.classList.add('error')
+// add element
+let btnOpen10Tab = document.createElement('button')
+btnOpen10Tab.style.scale = '0.5'
+btnOpen10Tab.style.marginLeft = '-50px'
+btnOpen10Tab.innerText = 'Open Ten'
+btnOpen10Tab.onclick = () => {
+    for (let i = 0; i < 10; i++) {
+        window.open('https://noitu.pro/arcade', '_blank');
+    }
+}
+document.querySelector('.container>.row').appendChild(btnOpen10Tab)
 
 //get form replay
 const getFormReplay = () => {
