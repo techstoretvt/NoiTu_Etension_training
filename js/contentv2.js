@@ -80,6 +80,7 @@ observer.observe(currentWord, config);
 
 
 const FuncAuto = async () => {
+    funcHandle.resetGame()
 
     let arrTextCurrent = currentWord.innerText.split(' ')
 
